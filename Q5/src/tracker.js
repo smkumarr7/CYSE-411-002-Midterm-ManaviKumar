@@ -21,10 +21,17 @@ let currentFilter = "all";
 
 
 function loadDashboardState() {
-    const raw   = localStorage.getItem("dashboardState");
-    const state = JSON.parse(raw);             // No try/catch
-    currentFilter = state.filter;              // No enum validation
-    applyFilter(currentFilter);
+    try {
+        const raw   = localStorage.getItem("dashboardState");
+        const state = JSON.parse(raw);             // No try/catch
+        currentFilter = state.filter;              // No enum validation
+        applyFilter(currentFilter);
+
+
+    }
+    catch(err) {
+        
+    }
 }
 
 
@@ -55,11 +62,20 @@ function saveDashboardState() {
 
 
 async function fetchIncidents() {
-    const res  = fetch("/api/incidents");      // Missing await
-    const data = res.json();                   // Missing await; res is a Promise
-    return data;
-}
+    try {
+        const res  = await fetch("/api/incidents");      // await is added
+        if (!res.ok) {
+            throw new Error('There is a response error: ' + res.status);
+        }
 
+        const data = await res.json();                   // await is added
+        return data;
+    }
+    catch(err) {
+        console.error("There is either a data parsing or network error.", err);
+        return [];
+    }  
+}
 
 
 //  Q5.B  Render Incidents
@@ -76,13 +92,21 @@ function renderIncidents(incidents) {
     container.innerHTML = "";                  // Clear previous results
 
     incidents.forEach(function (incident) {
-        const item = document.createElement("li");
-        // UNSAFE – directly inserts API response as HTML
-        item.innerHTML =
-            "<strong>" + incident.title + "</strong>" +
-            " <span class='severity severity-" + incident.severity + "'>" +
-            incident.severity + "</span>";
-        container.appendChild(item);
+        try {
+            const item = document.createElement("li");
+
+            if (!Array.isArray(incident) || incident.title == null || incident.severity == null) {
+                throw new Error("Either incident is not an array or incident title or severity are empty.");
+            }
+            else { 
+                // Now this is safe because it uses textContent.
+                item.textContent = incident.title + " " + incident.severity;
+                container.appendChild(item);
+            }
+        }
+        catch(err) {
+            console.error("There was either a data input type or empty field error: " + err);
+        }
     });
 }
 
