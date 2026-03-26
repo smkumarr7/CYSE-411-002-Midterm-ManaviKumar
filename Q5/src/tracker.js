@@ -46,7 +46,11 @@ function loadDashboardState() {
 
 function saveDashboardState() {
     const filterInput = document.getElementById("filter-select");
-    const filter      = filterInput.value;    // Not validated before storing
+    // validated before storing
+    if (!ACCEPTED_FILTERS.includes(filterInput.value)) {
+            currentFilter = 'all';
+    }
+    const filter      = filterInput.value;    
     localStorage.setItem("dashboardState", JSON.stringify({ filter: filter }));
     currentFilter = filter;
 }
