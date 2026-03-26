@@ -4,11 +4,23 @@
 
 
 function loadSession() {
-    const raw = sessionStorage.getItem("session");
-    const session = JSON.parse(raw);          // No try/catch
-    return session;                            // No field validation
+    try { // uses try/catch now
+        const raw = sessionStorage.getItem("session");
+        const session = JSON.parse(raw);
+        // field validation is below.
+        if (session.userId.length() == 0 || session.userID == null || session.role.length() == 0 || session.role == null || session.displayName.length() == 0 || session.displayName == null) {        
+            throw err("One or more fields are invalid.");
+        }
+        else {
+            return session;
+        }   
+    }
+    
+    catch(err) {
+        console.error("There was a either a parsing or invalid field error, so failed to authenticate: " + err);
+        return null;
+    }
 }
-
 
 //  Q4.A  Status Message Rendering
 //  Displays an employee's status message on their profile card.
@@ -18,7 +30,14 @@ function loadSession() {
 
 
 function renderStatusMessage(containerElement, message) {
-    containerElement.innerHTML = "<p>" + message + "</p>";   // UNSAFE
+    //containerElement.innerHTML = "<p>" + message + "</p>";   // UNSAFE
+    containerElement.innerHTML = ""; // we should clear the list first.
+
+    containerElement.forEach((message) => {
+        const liElement = document.createElement("li");
+        liElement.textContent = message; // this uses textContent.
+        containerElement.appendChild(liElement);
+    });
 }
 
 
@@ -36,13 +55,22 @@ function sanitizeSearchQuery(input) {
     //   - Trim leading/trailing whitespace before processing
     //   - Max 40 characters
     //   - Return null if the result is empty after sanitization
-    return input;   // UNSAFE – returns raw input unchanged
+    //return input;   // UNSAFE – returns raw input unchanged
+    
+    let sanitized = input.replace(/[^A-za-z0-9 -_]/g, "");
+    sanitized = sanitized.trim(); 
+    if (sanitized.length == 0) {
+        return null;
+    }
+    else {
+        return sanitized.substring(0,40);
+    }
 }
 
 function performSearch(query) {
     const sanitized = sanitizeSearchQuery(query);
     const label = document.getElementById("search-label");
-    label.innerHTML = "Showing results for: " + sanitized;  // UNSAFE
+    label.textContent = "Showing results for: " + sanitized;  // Now safe using textContent.
 }
 
 
