@@ -23,14 +23,16 @@ let currentFilter = "all";
 function loadDashboardState() {
     try {
         const raw   = localStorage.getItem("dashboardState");
-        const state = JSON.parse(raw);             // No try/catch
-        currentFilter = state.filter;              // No enum validation
+        const state = JSON.parse(raw);   
+        currentFilter = state.filter;
+        // enum validation
+        if (!ACCEPTED_FILTERS.includes(currentFilter)) {
+            currentFilter = 'all';
+        }
         applyFilter(currentFilter);
-
-
     }
     catch(err) {
-        
+        console.error("There was an error: " + err);
     }
 }
 
