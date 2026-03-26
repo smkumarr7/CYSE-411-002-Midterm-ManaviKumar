@@ -4,7 +4,7 @@
 
 
 function loadSession() {
-    try { // uses try/catch now
+    try { // uses try/catch now.
         const raw = sessionStorage.getItem("session");
         const session = JSON.parse(raw);
         // field validation is below.
